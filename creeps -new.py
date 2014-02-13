@@ -9,33 +9,19 @@ from pygame.sprite import Sprite
 
 from vec2d import vec2d
 
-
-NORTH=(0,-1)
-SOUTH=(0,1)
-WEST=(-1,0)
-EAST=(1,0)
-NE=(1,-1)
-SE=(1,1)
-NW=(-1,-1)
-SW=(-1,1)
-
 def run_game():
     # Game parameters
     SCREEN_WIDTH, SCREEN_HEIGHT = 1280,1024
     BG_COLOR = 150, 150, 80
-    CREEP_FILENAMES = [
-        'bluecreep.png', 
-        'pinkcreep.png', 
-        'graycreep.png']
     N_EATERS = 10
     N_BALANCERS = 30
     N_VICTIMS =50
-
+    creeps = list()
     pygame.init()
     screen = pygame.display.set_mode(
                 (SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
     clock = pygame.time.Clock()
-    creeps = list()
+    
     # Create N_CREEPS random creeps.
     def appendEater():
         creeps.append(Eater(screen,    (   randint(0, SCREEN_WIDTH),
@@ -57,14 +43,6 @@ def run_game():
                                 choice([-1, 1])),
                             0.2))
 
-    def appendCreep(species):
-        if species==0:
-            appendVictim()
-        elif species==1:
-            appendBalancer()
-        elif species==2:
-            appendEater()
-
     for i in range(N_EATERS):
         appendEater()
     for i in range(N_BALANCERS):
@@ -72,8 +50,6 @@ def run_game():
     for i in range(N_VICTIMS):
         appendVictim()
         
-    #reep = Reep(screen, choice(CREEP_FILENAMES), (100, 100), (0, -1), 0.0)
-    #creeps.append(reep)
     keyspressed=0
     # The main game loop
     c=0
@@ -109,41 +85,32 @@ def run_game():
             VMAX=VCOUNT
         print 'Current victims:',VCOUNT,' Max seen:', VMAX
         for creep1 in foodlist:
-            pos1 = creep1.getposition()
-            sta1 = creep1.getspecies()
-            hun1 = creep1.gethunger()
-                    #print foodlist
             foodlist.remove(creep1)
             for creep2 in foodlist:
-                pos2 = creep2.getposition()
-                sta2 = creep2.getspecies()
-                hun2 = creep2.gethunger()
-                if pos1.colliderect(pos2):
-                   # print pos1, sta1, pos2, sta2
-                    if sta1 == sta2:
-                        if creep2.getcooldown()==0 and (hun1==0 and hun2==0):
+                
+                if creep1.getposition().colliderect(creep2.getposition()):
+                    if (creep1.getspecies() == creep2.getspecies()):
+                        if (creep2.getcooldown()==0 and
+                            (creep1.gethunger()==0 and creep2.gethunger==0)):
                             creep2.invdirection()
                             creep2.reprod()
                             creep1.reprod()
-                            if sta1==0 and VCOUNT>150:
+                            if creep1.getspecies() is 0 and VCOUNT>150:
                                 print ''
-                            elif sta1==2 and ECOUNT>30:
+                            elif creep2.getspecies() is 2 and ECOUNT>30:
                                 print ''
                             else:
-                                appendCreep(sta1)
-                    elif sta1 == (sta2+1):
+                                appendVictim()
+                    elif creep1.getspecies() == (creep2.getspecies()+1):
                         creep1.eat()                    
                         creep2.die()                    
-                    elif sta1 == (sta2-1):
+                    elif creep1.getspecies() == (creep2.getspecies()-1):
                         creep2.eat()
                         creep1.die()
 
         pygame.display.flip()
 
-
 def exit_game():
     sys.exit()
-
-
 run_game()
 
